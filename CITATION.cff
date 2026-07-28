@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If this catalog helps your work, please cite it using this metadata."
+title: "Awesome MegaKernel"
+type: dataset
+authors:
+  - name: "Awesome MegaKernel Contributors"
+repository-code: "https://github.com/qhy991/Awesome-MegaKernel"
+url: "https://github.com/qhy991/Awesome-MegaKernel"
+license: CC0-1.0
+date-released: 2026-07-28
+keywords:
+  - megakernel
+  - persistent kernel
+  - LLM inference
+  - GPU compiler
+  - kernel fusion

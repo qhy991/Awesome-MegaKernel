@@ -1,0 +1,17 @@
+[
+  {
+    "date": "2026-07-28",
+    "version": "v0.3.0",
+    "summary": "Added a Chinese literature review, transactional bilingual rendering, stricter schema and marker validation, regression tests, localized generated labels, and a second factual audit."
+  },
+  {
+    "date": "2026-07-28",
+    "version": "v0.2.0",
+    "summary": "Expanded and reclassified the catalog; added a zero-dependency validator and bilingual README renderer."
+  },
+  {
+    "date": "2026-07-27",
+    "version": "v0.1.0",
+    "summary": "Initial curated Awesome MegaKernel list."
+  }
+]
