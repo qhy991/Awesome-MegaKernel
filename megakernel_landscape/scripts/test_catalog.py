@@ -32,11 +32,17 @@ class CatalogValidationTests(unittest.TestCase):
             data,
             changelog=self.changelog,
             readmes=self.readmes,
-            today=date(2026, 7, 28),
+            today=date.fromisoformat(self.data["updated"]),
         )
 
     def test_current_catalog_is_valid(self) -> None:
         self.assertEqual(self.validate(self.data), [])
+
+    def test_future_entry_date_is_rejected(self) -> None:
+        mutated = deepcopy(self.data)
+        mutated["repos"][0]["date"] = "2099-01"
+        errors = self.validate(mutated)
+        self.assertTrue(any("date 2099-01 is in the future" in item for item in errors))
 
     def test_bad_categories_type_is_reported_without_traceback(self) -> None:
         mutated = deepcopy(self.data)

@@ -5,10 +5,10 @@
 ### A curated, evidence-first map of whole-model kernels, persistent runtimes, and deeply fused LLM systems
 
 [![Awesome](https://awesome.re/badge.svg)](https://awesome.re)
-[![Last Updated](https://img.shields.io/badge/Last%20Updated-2026--07--28-blue.svg)](https://github.com/qhy991/Awesome-MegaKernel)
+[![Last Updated](https://img.shields.io/badge/Last%20Updated-2026--08--05-blue.svg)](https://github.com/qhy991/Awesome-MegaKernel)
 [![Papers](https://img.shields.io/badge/Papers-27-green.svg)](#-research-papers--reports)
-[![Systems](https://img.shields.io/badge/Systems-26-orange.svg)](#-systems-repositories--artifacts)
-[![Readings](https://img.shields.io/badge/Readings-13-blueviolet.svg)](#-blogs--deep-dive-reading)
+[![Systems](https://img.shields.io/badge/Systems-27-orange.svg)](#-systems-repositories--artifacts)
+[![Readings](https://img.shields.io/badge/Readings-14-blueviolet.svg)](#-blogs--deep-dive-reading)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 [中文 README](README.zh-CN.md)
@@ -36,7 +36,7 @@ coarse compute–communication barriers can dominate useful work.
 > persistent kernel or equivalent device-resident engine. Foundations and
 > adjacent work are labeled explicitly.
 
-**Last curated:** 2026-07-28. Titles, venues, code relationships, and artifact
+**Last curated:** 2026-08-05. Titles, venues, code relationships, and artifact
 limitations were checked against primary paper pages, canonical repositories,
 and first-party documentation.
 
@@ -48,6 +48,9 @@ and first-party documentation.
 - The important scheduling unit is increasingly a **tile/task**, not an
   operator. MPK, Event Tensor, DITRON, Fleet, TileRT, and related systems expose
   different versions of that idea.
+- Mixture-of-Kittens extends the open-source MoE frontier from forward fusion to
+  deterministic Blackwell training, including backward, router gradients, and
+  bounded activation replay.
 - “Open source” needs qualification. Some projects publish complete research
   code; others expose Python tooling around a binary backend or remain
   model/hardware-specific artifacts.
@@ -59,6 +62,9 @@ and first-party documentation.
 
 - [MegaKernel literature review (Chinese)](docs/megakernel-survey.zh-CN.md)
   — a route-based synthesis of the research landscape and open questions.
+- [Mixture-of-Kittens source study (Chinese)](docs/case-studies/mixture-of-kittens.zh-CN.md)
+  — an SM100-level audit of deterministic MoE training, communication direction,
+  CLC scheduling, and activation replay.
 - [Awesome LLM Kernel Agent](https://github.com/qhy991/Awesome-LLM-Kernel-Agent)
   — LLM/agent-driven kernel generation and optimization.
 - [Awesome LLM Circuit Agent](https://github.com/qhy991/Awesome-LLM-Circuit-Agent)
@@ -135,6 +141,7 @@ timeline
             : DITRON
     2026-06 : AutoMegaKernel
     2026-07 : ExpertPlex
+    2026-08 : Mixture-of-Kittens
 ```
 <!-- CATALOG:TIMELINE:END -->
 
@@ -246,6 +253,7 @@ Persistent kernels and frameworks that fuse communication with tensor or expert 
 
 | Project | Target / role | Hardware & artifact status | Why it matters |
 | :--- | :--- | :--- | :--- |
+| [**Mixture-of-Kittens**](https://github.com/cursor/mixture-of-kittens)<br>![GitHub stars](https://img.shields.io/github/stars/cursor/mixture-of-kittens?style=flat-square&label=%E2%98%85) | Deterministic expert-parallel MoE training on NVL72 | Apache-2.0 CUDA source; SM100/SM103, CUDA 13+, PyTorch symmetric memory, EP 4/8/16/32/64 | **Core** — Closes the training loop with forward and backward megakernels that combine pull-dispatch/push-combine, dedicated communication SMs, CLC-scheduled two-CTA compute clusters, deterministic reductions, and bounded activation replay. |
 | [**Alpha-MoE**](https://github.com/Aleph-Alpha/Alpha-MoE)<br>![GitHub stars](https://img.shields.io/github/stars/Aleph-Alpha/Alpha-MoE?style=flat-square&label=%E2%98%85) | Tensor-parallel W8A8 MoE serving | Apache-2.0; CUDA FP8 and shape/hardware specific | **Core** — A vLLM/SGLang-compatible fused MoE layer used as a concrete target by RaMP. |
 | [**FlashMoE**](https://github.com/osayamenja/FlashMoE)<br>![GitHub stars](https://img.shields.io/github/stars/osayamenja/FlashMoE?style=flat-square&label=%E2%98%85) | Distributed MoE dispatch + FFN + combine | BSD-3-Clause; SM70+ supported, evaluated primarily on H100; NVSHMEM/CUTLASS/cuBLASDx | **Core** — The primary code artifact for fully GPU-resident MoE execution in one persistent kernel. |
 | [**Microsoft ARK**](https://github.com/microsoft/ark)<br>![GitHub stars](https://img.shields.io/github/stars/microsoft/ark?style=flat-square&label=%E2%98%85) | GPU-driven distributed application loop kernel | MIT; CUDA and AMD CDNA3 support; actively maintained in 2026 | **Foundation** — A historical system that moves distributed compute and communication orchestration off the CPU. |
@@ -292,6 +300,7 @@ First-party implementation notes and reproducible walkthroughs.
 
 Engineering notes on tensor/expert parallelism, GPU-initiated communication, and overlap.
 
+- [Mixture-of-Kittens: our open-source MoE megakernel for NVL72s](https://cursor.com/blog/mixture-of-kittens) — **First-party deep dive.** Explains reusable pull-dispatch/push-combine scheduling, minibatch overlap, the reversed macrobatch ring, exact SM partitioning, CLC coexistence with inter-rack communication, determinism, and author-reported NVL72 results.
 - [Alpha-MoE: A Megakernel for Faster Tensor Parallel Inference](https://aleph-alpha.com/en/blog/alpha-moe-a-megakernel-for-faster-tensor-parallel-inference/) — **Official engineering post.** Explains Alpha-MoE's fusion boundary and serving integration; treat benchmark figures as author-reported and configuration-specific.
 - [One Kernel for All Your GPUs](https://hazyresearch.stanford.edu/blog/2025-09-22-pgl) — **Engineering blog.** Introduces ThunderKittens PGL and communication directly from persistent multi-GPU kernels.
 - [mKernel: Fast Multi-GPU, Multi-Node Fused Kernels](https://uccl-project.github.io/posts/mkernel/) — **Project blog.** Explains GPU-initiated RDMA, SM specialization, and the library's fused collective-compute kernels.
@@ -315,7 +324,7 @@ Useful context whose claims should be read with the stated hardware and artifact
 | Small, readable model-specific implementations | **model-as-a-kernel**, **qwen_megakernel**, **MegaQwen** (check each output-stage boundary) |
 | Hand-tuned low-latency CUDA | **HazyResearch Megakernels**, **qwen_megakernel**, **Lucebox** |
 | Multi-GPU low-latency serving | **TileRT**, **MPK**, Hazy's tensor-parallel branch |
-| Distributed MoE fusion | **FlashMoE**, **mKernel**, **Triton-distributed**, **Alpha-MoE** |
+| Distributed MoE fusion | **Mixture-of-Kittens**, **FlashMoE**, **mKernel**, **Triton-distributed**, **Alpha-MoE** |
 | Dynamic shapes or routing | **Event Tensor**, **RaMP**, **ExpertPlex** |
 | AMD / non-NVIDIA paths | **Fleet**, **TileLang**, **megagdn-pto**, **AWS Transformer TKG** |
 | Agent-generated megakernels | **AutoMegaKernel** and the related [Awesome LLM Kernel Agent](https://github.com/qhy991/Awesome-LLM-Kernel-Agent) list |

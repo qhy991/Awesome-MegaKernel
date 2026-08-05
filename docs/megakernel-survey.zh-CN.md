@@ -6,7 +6,7 @@
 [阅读目录](../README.zh-CN.md#-博客与深度阅读) ·
 [分类规范](../megakernel_landscape/docs/taxonomy.md)
 
-> 本文是一份持续维护的中文综述，覆盖截至 **2026-07-28** 收录于
+> 本文是一份持续维护的中文综述，覆盖截至 **2026-08-05** 收录于
 > Awesome MegaKernel 的论文、系统仓库与一手工程资料。完整条目与制品状态以
 > [`catalog.json`](../megakernel_landscape/data/catalog.json) 为准。
 
@@ -38,6 +38,9 @@ Tile/Task，控制逻辑从主机侧迁入设备侧，但它们对静态形状�
   Chiplet/多 GPU 层级仍采用不同抽象。
 - 单次 Launch 不自动等于完整 End-to-end 推理；LM Head、Sampling、KV Cache
   管理、通信 Proxy 与 Host Setup 经常位于测量边界之外。
+- Mixture-of-Kittens 表明，MoE Megakernel 的设计边界可以闭合到训练
+  Forward/Backward、Router Gradient、确定性归约和有界 Activation Replay；
+  但其“核心单 Kernel”仍不等于 Functional API 只有一次 Launch。
 - Wavefront、解耦 Micro-op 和较小作用域的深度融合在高发散、强动态或资源
   压力较大的场景中可能更合适，因此 MegaKernel 是条件化选择而非默认答案。
 
@@ -156,6 +159,13 @@ MegaKernel，并关注 Token 顺序的确定性；[^20] RaMP 根据运行时路�
 仍位于 Kernel 外部，因此更接近运行时适配层。[^21] ExpertPlex 则把自适应
 Persistent Kernel 放入 Prefill/Decode 解耦的 MoE Serving 场景。[^27]
 
+2026 年 8 月公开的 Mixture-of-Kittens（MoK）把这条路线进一步推到完整训练
+闭环：在 SM100/SM103 上以 Pull-Dispatch/Push-Combine、通信 SM 与计算 SM
+空间分区、双 CTA Cluster、CLC 任务窃取和 Macrobatch Ring Replay 联合实现
+Forward/Backward，并通过固定 Route Slot 与归约次序保持 Bitwise
+Determinism。[^E16][^E17] 它是当前列表中观察 Blackwell 专用 MoE 训练
+Megakernel 如何同时处理算通重叠、显存上界和数值协议的代表性开源制品。
+
 自动化方向形成了两种互补思路。Ada-MK 在离线阶段搜索 MLIR DAG 调度，再把
 结果集成到混合服务路径；[^23] AutoMegaKernel 暴露面向 Agent 的 Schedule
 IR，并在生成 CUDA 前检查死锁和竞态相关不变量。[^22] 后者提供的是有明确
@@ -211,6 +221,48 @@ End-to-end 覆盖。
 等工程仓库则把 NVLink/RDMA 与 GEMM、MoE 和 Ring Attention 组合为多 GPU/
 多节点融合 Kernel。[^E6]
 
+#### 4.3.1 Mixture-of-Kittens：从算通融合到确定性训练闭环
+
+MoK 的贡献不宜简化成“把更多算子放进一个 Kernel”。它同时改变了通信方向、
+调度表含义、SM 资源归属、Activation 生命周期和浮点归约协议：
+
+```mermaid
+flowchart LR
+    R[Top-k Route] --> S[GPU Schedule<br/>Expert-contiguous / Peer-interleaved]
+    S --> D[Pull Dispatch]
+    subgraph M[Forward / Backward Core Megakernel]
+      direction LR
+      D -->|Minibatch Counter| G[2-CTA Gate / Up GEMM]
+      G --> W[SwiGLU + MXFP8 Layouts]
+      W --> N[Down GEMM]
+      N --> C[Push Combine]
+    end
+    C --> E[固定 Route-slot Reduction]
+    M -. CLC 可让渡计算工作 .-> X[FSDP / 跨机架 RDMA]
+```
+
+- **Pull-Dispatch、Push-Combine。**目标 Rank 自行决定 Expert-contiguous 落点，
+  同一张 `{peer, route}` 表可供 Forward/Backward 的四次通信复用；独立 Route
+  Slot 让最终 Weighted Sum 按固定 Top-k 次序执行。[^E17]
+- **SM 级和 Warp 级两层专门化。**一部分完整 SM 负责 NVLink Pull/Push，其余
+  双 CTA Cluster 执行 `M256×N256` GEMM；Compute CTA 内再把 TMA/Tensor Core
+  与 TMEM Epilogue 分给不同 Warpgroup。[^E16]
+- **CLC 不只处理 Tail。**逻辑 Block ID 编码异构任务，驻留的计算 Cluster
+  取消尚未启动的尾部 Block 来取得工作；可取消的 Persistent Grid 也更容易
+  向高优先级的 FSDP/RDMA Kernel 让出资源。[^E16][^E17]
+- **Minibatch 与 Macrobatch 解耦。**前者决定算通交接粒度，后者决定 Activation
+  Ring 容量。Forward 逆序走 Macrobatch，使 Ring 最终保留 Backward 最先消费
+  的激活，后续批次只 Replay 到 SwiGLU。[^E17]
+- **动态调度、固定算术图。**CLC 可以改变任务完成顺序，但 Combine Route
+  Slot、Router-gradient Partial 和 Wgrad Macrobatch 累加次序固定，因此
+  Work-stealing 不改变浮点归约图。[^E16]
+
+这里也必须保留 Fusion Boundary：Functional Forward 仍包含 Route All-gather、
+三个 Scheduler Kernel、设备 Barrier、核心 Megakernel 和最终 Epilogue；所谓
+“消除 CPU-GPU 同步”指 Workspace 建好后的热路径调度不依赖 D2H Token-count
+读回，不表示整个 API 只有一次 Launch。更完整的固定提交源码审计见
+[《Mixture-of-Kittens：面向 NVL72 的确定性 MoE 训练 Megakernel》](case-studies/mixture-of-kittens.zh-CN.md)。
+
 ### 4.4 自动搜索、生成与验证
 
 当融合作用域扩大到完整模型或分布式任务图，调度空间也随之增大。Ada-MK 把
@@ -258,6 +310,7 @@ Micro-op，显式挑战单体式设备侧编排。[^25] 这些证据说明，选
 | cuSync[^6] | 如何细化依赖 Kernel 的同步粒度 | Tile；跨 Kernel 同步策略 | 依赖算子重叠 | 基础同步机制 |
 | FlashFormer[^8] | 如何消除低 Batch Transformer 的执行间隙 | 模型阶段；静态 Whole-model Kernel | Llama 类低 Batch 推理 | 公开仓库不是完整 Runner |
 | FlashMoE[^9] | 如何联合调度专家计算与跨 GPU 通信 | MoE Tile/阶段；单持久化 Kernel | 分布式 MoE | 通信后端与拓扑相关 |
+| Mixture-of-Kittens[^E16] | 如何把算通融合闭合到确定性 MoE 训练 | Minibatch/Macrobatch；通信 SM + CLC 双 CTA Cluster | NVL72 MoE Training | SM100/SM103、对称内存与 NVLink Domain 假设强 |
 | MPK[^13] | 如何自动 Mega-kernelize 张量程序 | SM Task；去中心化 Kernel 内运行时 | 单/多 GPU 张量程序 | 编译与运行时复杂度 |
 | Event Tensor[^17] | 如何表达动态形状/数据依赖 | Event Tensor/Tile Task；设备运行时 | 动态 MegaKernel | 依赖表达和运行时成本 |
 | Fleet[^18] | 如何适配多 Die GPU 层级 | Chiplet-aware Task；逐 Chiplet 调度 | AMD 多 Die GPU | 架构层级专用 |
@@ -272,8 +325,9 @@ Micro-op，显式挑战单体式设备侧编排。[^25] 这些证据说明，选
 | 判断 | 主要证据 | 证据强度 | 不能推出的结论 |
 | :--- | :--- | :--- | :--- |
 | 调度粒度正从算子下沉到 Tile/Task | Rammer、cuSync、PipeThreader、MPK、Event Tensor、DITRON、Fleet[^4][^6][^11][^13][^17][^18][^19] | 多条独立研究路线的机制证据 | 所有系统最终都会采用同一种 Task IR |
-| 设备侧控制可减少 Host 编排边界 | ARK、FlashFormer、FlashMoE、MPK[^5][^8][^9][^13] | 论文与系统实现均支持 | 任意模型、Batch 和硬件都会更快 |
-| 分布式 MegaKernel 的核心是计算—通信共同调度 | FlashMoE、UniEP、DITRON、Perseus[^9][^19][^20][^24] | 机制与制品证据 | 不同网络、精度和拓扑的性能可以直接横比 |
+| 设备侧控制可减少 Host 编排边界 | ARK、FlashFormer、FlashMoE、MPK、MoK[^5][^8][^9][^13][^E16] | 论文与系统实现均支持 | 任意模型、Batch 和硬件都会更快 |
+| 分布式 MegaKernel 的核心是计算—通信共同调度 | FlashMoE、UniEP、DITRON、Perseus、MoK[^9][^19][^20][^24][^E16] | 机制与制品证据 | 不同网络、精度和拓扑的性能可以直接横比 |
+| 动态 Task 次序可以与确定浮点归约图解耦 | MoK 的 Route Slot、Router Partial 与顺序 Wgrad 累加[^E16] | 固定提交源码证据 | 任意使用 Work-stealing 的 Kernel 都自动确定 |
 | 动态性要求新的依赖表示或运行时选择 | Event Tensor、RaMP、ExpertPlex[^17][^21][^27] | 多个场景的存在性证据 | 已形成统一的动态 MegaKernel 方案 |
 | MegaKernel 存在明确反例和替代路线 | 两代路径追踪研究、VDCores[^2][^25][^26] | 直接对照与替代机制 | MegaKernel 在 LLM 中没有价值 |
 | “公开仓库”不等于完整可复现系统 | FlashFormer、TileRT、多个模型专用仓库的制品审计[^E2][^E7] | 仓库级直接观察 | 未完整开源的论文结论必然无效 |
@@ -294,6 +348,7 @@ Micro-op，显式挑战单体式设备侧编排。[^25] 这些证据说明，选
 | TileRT[^E7] | Python/工具源码与固定 ABI 二进制 Wheel | 核心后端并非全部源码开放，当前硬件路径集中 |
 | model-as-a-kernel[^E4] | Apache-2.0 教学制品 | 单 CUDA 设备、Batch Size 1、Greedy-only |
 | FlashMoE[^E10] | BSD-3-Clause 源码 | 支持 SM70+，主要评测与依赖围绕 H100/NVSHMEM |
+| Mixture-of-Kittens[^E16] | Apache-2.0 CUDA/Python、测试与单层 Benchmark | SM100/SM103、CUDA 13+、PyTorch 对称内存；公开路径支持 EP 4/8/16/32/64，NVL72 假设强 |
 | Alpha-MoE[^E11] | Apache-2.0 源码 | FP8、模型形状和硬件针对性较强 |
 | Triton-distributed[^E12] | 分布式 Triton Kernel、教程与 UniEP 路径 | NVIDIA/AMD 能力与 NVSHMEM 依赖因路径而异 |
 | mKernel[^E6] | MIT，多 GPU/多节点融合 Kernel | 主要面向 Hopper sm_90a 与 CX7/EFA |
@@ -314,10 +369,13 @@ Fleet、DITRON 与 Luminal 则把一部分决策保留为设备侧任务调度�
 
 ### 8.2 从计算融合转向计算—通信协同
 
-MoE 与张量/专家并行使通信进入关键路径。FlashMoE、UniEP、DITRON 和 mKernel
+MoE 与张量/专家并行使通信进入关键路径。FlashMoE、UniEP、DITRON、mKernel
+和 Mixture-of-Kittens
 表明，设备发起通信只是起点；真正的优化对象是 Token/Tile 何时产生、何时
 传输、由哪些 SM 执行，以及计算和网络进度如何互不阻塞。跨节点场景中的 Proxy、
-Fence 和 NIC 能力会重新决定最优调度。
+Fence 和 NIC 能力会重新决定最优调度。MoK 进一步说明 Push/Pull 方向会同时
+改变远端地址协调、完成信号和 Schedule 复用，而 CLC 的价值还包括让
+Persistent Grid 与高优先级跨机架通信共享 SM。[^E16][^E17]
 
 ### 8.3 从单架构极致调优转向受约束的可移植抽象
 
@@ -351,6 +409,15 @@ MegaKernel 论文经常给出显著的延迟或吞吐改进，但不同工作的
 | Protocol | Warmup、重复次数、聚合方式、正确性门槛和超时/失败处理是什么？ |
 | Metric | 延迟、吞吐、Goodput、GPU 利用率或重叠率的单位与分母是什么？ |
 
+以 MoK 为例，项目方在 GB300 NVL72、EP=64、每 GPU 路由前 2,048 Tokens 的
+四组模型形状上报告最大 2.37× MXFP8 Forward、1.78× MXFP8 Backward、1.92×
+BF16 Forward 和 1.58× BF16 Backward；在 512 张 GB300 的内部生产栈中，相对
+此前 DeepEP-based 自研 MXFP8 路径报告 1.41× Tokens/s/GPU。[^E17] 前一组有
+公开单层 Benchmark 代码，后一组依赖未公开训练栈；二者都是作者报告最大值，
+不等于独立复现或跨拓扑的典型收益。本次源码审计只完成 SM100 编译和单 GPU
+MXFP8 Quantize Smoke，受作业 GPU 可见性限制未进入 EP≥4 的多卡主核；详见
+[MoK 案例文档](case-studies/mixture-of-kittens.zh-CN.md#12-本机-sm100-验证边界)。
+
 只有这些条件足够匹配时，Speedup 才适合横向比较。单篇论文的最大值可以证明
 某个配置下存在优化机会，不能代表典型收益；“出现通信和计算并发”也不能直接
 推出通信延迟已被完全隐藏。对于技术报告、项目博客和二进制后端，性能结论应
@@ -362,17 +429,19 @@ MegaKernel 论文经常给出显著的延迟或吞吐改进，但不同工作的
    GPU、拓扑、软件版本和基线配置，缺少能够区分 Kernel-only 与 End-to-end
    边界的公共协议。未来 Benchmark 应同时报告正确性、典型性能、尾延迟、
    编译/搜索成本和失败率。
-2. **动态工作负载的低成本调度。** Event Tensor、RaMP 与 ExpertPlex 已开始
-   处理形状、路由和服务阶段差异，但动态队列、负载均衡与确定性之间仍缺少
-   通用解法。
+2. **动态工作负载的低成本调度。** Event Tensor、RaMP、ExpertPlex 与 MoK
+   已开始处理形状、路由、服务阶段或动态 Task 次序；MoK 证明固定归约图可以
+   与 Work-stealing 共存，但动态队列、负载均衡、容量溢出和确定性之间仍缺少
+   跨系统通用解法。
 3. **跨节点活性与通信语义。** RDMA Proxy、Fence、NIC 能力和网络拓扑可能
    破坏 Kernel 内预期的重叠；需要能表达进度保证与故障行为的通信—计算 IR。
 4. **完整 End-to-end 边界。** 许多模型专用实现仍把 LM Head、Sampling、
    Prefix/Paged KV 管理或请求调度留在 MegaKernel 外。论文应明确“整模型”
    覆盖的输入、输出和排除阶段。
-5. **可移植性与资源模型。** 寄存器、Shared Memory、Cluster、Chiplet Cache、
-   NPU ISA 和通信原语差异巨大。需要既能暴露硬件结构、又不会把调度完全锁死
-   在单代设备上的 IR 与成本模型。
+5. **可移植性与资源模型。** 寄存器、Shared Memory、TMEM、CLC、Cluster、
+   Chiplet Cache、NPU ISA 和通信原语差异巨大。MoK 展示了充分利用 SM100
+   可以得到的系统收益，也展示了双 CTA、NVLS 和对称地址空间带来的强绑定。
+   需要既能暴露硬件结构、又不会把调度完全锁死在单代设备上的 IR 与成本模型。
 6. **自动生成的验证边界。** Agent 可以扩大调度搜索规模，但也扩大错误空间。
    后续工作需要公开拒绝样例、假阴性/假阳性、Trusted Base、搜索预算和跨架构
    正确性证据。
@@ -389,7 +458,7 @@ MegaKernel 论文经常给出显著的延迟或吞吐改进，但不同工作的
 - **理解整模型与设备运行时**：HazyResearch 工程文章 → FlashFormer →
   PipeThreader → Mirage → MPK → Event Tensor。
 - **理解分布式/MoE**：ARK → FlashMoE → Alpha-MoE → UniEP →
-  DITRON → ExpertPlex → Perseus。
+  DITRON → Mixture-of-Kittens → ExpertPlex → Perseus。
 - **理解设计边界**：Megakernels Considered Harmful → ClusterFusion /
   FlashFuser → VDCores → 新的 MegaKernel/Wavefront 对照。
 - **理解自动化方向**：Mirage → Ada-MK → AutoMegaKernel，并结合各自的
@@ -454,3 +523,5 @@ MegaKernel 论文经常给出显著的延迟或吞吐改进，但不同工作的
 [^E13]: [AWS Transformer TKG documentation](https://awsdocs-neuron.readthedocs-hosted.com/en/v2.29.1/nki/library/api/transformer-tkg.html)。
 [^E14]: [Lucebox](https://github.com/Luce-Org/lucebox)。
 [^E15]: [TileLang](https://github.com/tile-ai/tilelang)。
+[^E16]: [Mixture-of-Kittens 源码](https://github.com/cursor/mixture-of-kittens)，本文审计固定到提交 `3e1cf43ab93ad040afed52a45ab03cb490ffe4be`；详见[源码级案例](case-studies/mixture-of-kittens.zh-CN.md)。
+[^E17]: [Mixture-of-Kittens: our open-source MoE megakernel for NVL72s](https://cursor.com/blog/mixture-of-kittens)，Cursor Research，2026-08-04；性能结论按作者报告处理。

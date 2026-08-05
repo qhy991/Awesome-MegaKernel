@@ -1,6 +1,6 @@
 {
-  "version": "0.3.0",
-  "updated": "2026-07-28",
+  "version": "0.4.0",
+  "updated": "2026-08-05",
   "categories": {
     "papers": [
       {
@@ -704,6 +704,23 @@
       "related": ["flashmoe", "hidden_serialization"]
     },
     {
+      "id": "mixture_of_kittens",
+      "name": "Mixture-of-Kittens",
+      "url": "https://github.com/cursor/mixture-of-kittens",
+      "date": "2026-08",
+      "category": "distributed_moe",
+      "scope": "core",
+      "target_en": "Deterministic expert-parallel MoE training on NVL72",
+      "target_zh": "NVL72 上的确定性专家并行 MoE 训练",
+      "status_en": "Apache-2.0 CUDA source; SM100/SM103, CUDA 13+, PyTorch symmetric memory, EP 4/8/16/32/64",
+      "status_zh": "Apache-2.0 CUDA 源码；SM100/SM103、CUDA 13+、PyTorch 对称内存、EP 4/8/16/32/64",
+      "summary_en": "Closes the training loop with forward and backward megakernels that combine pull-dispatch/push-combine, dedicated communication SMs, CLC-scheduled two-CTA compute clusters, deterministic reductions, and bounded activation replay.",
+      "summary_zh": "以前向和反向 Megakernel 闭合训练链路：结合 Pull-Dispatch/Push-Combine、通信 SM 专职化、CLC 调度的双 CTA 计算 Cluster、确定性归约与有界激活重放。",
+      "related": ["mixture_of_kittens_blog", "thunderkittens_repo"],
+      "timeline_label_en": "Mixture-of-Kittens",
+      "timeline_label_zh": "Mixture-of-Kittens"
+    },
+    {
       "id": "alpha_moe_repo",
       "name": "Alpha-MoE",
       "url": "https://github.com/Aleph-Alpha/Alpha-MoE",
@@ -775,7 +792,7 @@
       "status_zh": "开源；聚焦 NVIDIA GPU",
       "summary_en": "The direct programming substrate for HazyResearch's single- and multi-GPU megakernels.",
       "summary_zh": "HazyResearch 单 GPU 与多 GPU Megakernel 的直接编程底座。",
-      "related": ["thunderkittens_paper", "hazy_megakernels", "hazy_pgl"]
+      "related": ["thunderkittens_paper", "hazy_megakernels", "hazy_pgl", "mixture_of_kittens"]
     },
     {
       "id": "tilelang",
@@ -881,6 +898,19 @@
     }
   ],
   "readings": [
+    {
+      "id": "mixture_of_kittens_blog",
+      "name": "Mixture-of-Kittens: our open-source MoE megakernel for NVL72s",
+      "url": "https://cursor.com/blog/mixture-of-kittens",
+      "date": "2026-08",
+      "category": "distributed",
+      "scope": "core",
+      "kind_en": "First-party deep dive",
+      "kind_zh": "第一方深度解析",
+      "summary_en": "Explains reusable pull-dispatch/push-combine scheduling, minibatch overlap, the reversed macrobatch ring, exact SM partitioning, CLC coexistence with inter-rack communication, determinism, and author-reported NVL72 results.",
+      "summary_zh": "解释可复用的 Pull-Dispatch/Push-Combine 调度、Minibatch 算通重叠、反向 Macrobatch Ring、精确 SM 分区、CLC 与跨机架通信共存、确定性及作者报告的 NVL72 结果。",
+      "related": ["mixture_of_kittens"]
+    },
     {
       "id": "luminal_blog",
       "name": "Compiling Models to Megakernels",

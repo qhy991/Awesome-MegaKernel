@@ -5,10 +5,10 @@
 ### 整模型内核、持久化运行时与深度融合 LLM 系统的证据优先精选图谱
 
 [![Awesome](https://awesome.re/badge.svg)](https://awesome.re)
-[![Last Updated](https://img.shields.io/badge/Last%20Updated-2026--07--28-blue.svg)](https://github.com/qhy991/Awesome-MegaKernel)
+[![Last Updated](https://img.shields.io/badge/Last%20Updated-2026--08--05-blue.svg)](https://github.com/qhy991/Awesome-MegaKernel)
 [![Papers](https://img.shields.io/badge/Papers-27-green.svg)](#-研究论文与报告)
-[![Systems](https://img.shields.io/badge/Systems-26-orange.svg)](#-系统仓库与制品)
-[![Readings](https://img.shields.io/badge/Readings-13-blueviolet.svg)](#-博客与深度阅读)
+[![Systems](https://img.shields.io/badge/Systems-27-orange.svg)](#-系统仓库与制品)
+[![Readings](https://img.shields.io/badge/Readings-14-blueviolet.svg)](#-博客与深度阅读)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 [English README](README.md)
@@ -27,17 +27,20 @@
 
 > **收录原则：**“很大/融合的 Kernel”并不足够。核心条目必须在持久化内核或等价设备常驻引擎中调度多个模型算子或通信阶段。基础工作和相邻工作会被显式标注。
 
-**最近整理：**2026-07-28。标题、会议、代码关系与制品限制均依据论文主页、官方仓库和第一方文档核验。
+**最近整理：**2026-08-05。标题、会议、代码关系与制品限制均依据论文主页、官方仓库和第一方文档核验。
 
 ### 快速结论
 
 - 当前主要有三条路线：**手写整模型内核**、**编译器生成的任务图/解释器**，以及**分布式/MoE 持久化内核**。
 - 调度单位正从“算子”转向 **Tile/Task**。MPK、Event Tensor、DITRON、Fleet、TileRT 等系统分别体现了这一思路。
+- Mixture-of-Kittens 把开源 MoE Megakernel 的边界推进到 Blackwell 确定性训练，覆盖 Backward、Router Gradient 与有界 Activation Replay。
 - “开源”需要进一步说明：有些项目发布完整研究代码，有些只开放围绕二进制后端的 Python 工具，还有一些是强模型/硬件绑定的研究制品。
 - Megakernel 并非总是更快。分支发散、寄存器压力、指令体积、动态负载和异步硬件单元都可能让 Wavefront 或解耦执行更合适。
 
 > 想按研究路线而不是逐条目录阅读，可参见
 > [《MegaKernel 研究综述》](docs/megakernel-survey.zh-CN.md)。
+> Mixture-of-Kittens 的 SM100 源码级拆解见
+> [《Mixture-of-Kittens：确定性 MoE 训练 Megakernel》](docs/case-studies/mixture-of-kittens.zh-CN.md)。
 
 ### 相关列表
 
@@ -113,6 +116,7 @@ timeline
             : DITRON
     2026-06 : AutoMegaKernel
     2026-07 : ExpertPlex
+    2026-08 : Mixture-of-Kittens
 ```
 <!-- CATALOG:TIMELINE:END -->
 
@@ -219,6 +223,7 @@ timeline
 
 | 项目 | 目标 / 角色 | 硬件与制品状态 | 价值 |
 | :--- | :--- | :--- | :--- |
+| [**Mixture-of-Kittens**](https://github.com/cursor/mixture-of-kittens)<br>![GitHub stars](https://img.shields.io/github/stars/cursor/mixture-of-kittens?style=flat-square&label=%E2%98%85) | NVL72 上的确定性专家并行 MoE 训练 | Apache-2.0 CUDA 源码；SM100/SM103、CUDA 13+、PyTorch 对称内存、EP 4/8/16/32/64 | **核心** — 以前向和反向 Megakernel 闭合训练链路：结合 Pull-Dispatch/Push-Combine、通信 SM 专职化、CLC 调度的双 CTA 计算 Cluster、确定性归约与有界激活重放。 |
 | [**Alpha-MoE**](https://github.com/Aleph-Alpha/Alpha-MoE)<br>![GitHub stars](https://img.shields.io/github/stars/Aleph-Alpha/Alpha-MoE?style=flat-square&label=%E2%98%85) | 张量并行 W8A8 MoE 服务 | Apache-2.0；CUDA FP8，模型形状与硬件针对性较强 | **核心** — 兼容 vLLM/SGLang 的融合 MoE 层，也是 RaMP 的具体适配目标。 |
 | [**FlashMoE**](https://github.com/osayamenja/FlashMoE)<br>![GitHub stars](https://img.shields.io/github/stars/osayamenja/FlashMoE?style=flat-square&label=%E2%98%85) | 分布式 MoE Dispatch + FFN + Combine | BSD-3-Clause；支持 SM70+、主要在 H100 评测；依赖 NVSHMEM/CUTLASS/cuBLASDx | **核心** — 在单个持久化内核中实现全 GPU 常驻 MoE 执行的主要代码制品。 |
 | [**Microsoft ARK**](https://github.com/microsoft/ark)<br>![GitHub stars](https://img.shields.io/github/stars/microsoft/ark?style=flat-square&label=%E2%98%85) | GPU 驱动的分布式应用 Loop Kernel | MIT；支持 CUDA 与 AMD CDNA3；2026 年仍在持续维护 | **基础** — 把分布式计算与通信编排从 CPU 移到 GPU 的历史性系统。 |
@@ -264,6 +269,7 @@ timeline
 
 张量/专家并行、GPU 发起通信与算通重叠的工程资料。
 
+- [Mixture-of-Kittens: our open-source MoE megakernel for NVL72s](https://cursor.com/blog/mixture-of-kittens) — **第一方深度解析。** 解释可复用的 Pull-Dispatch/Push-Combine 调度、Minibatch 算通重叠、反向 Macrobatch Ring、精确 SM 分区、CLC 与跨机架通信共存、确定性及作者报告的 NVL72 结果。
 - [Alpha-MoE: A Megakernel for Faster Tensor Parallel Inference](https://aleph-alpha.com/en/blog/alpha-moe-a-megakernel-for-faster-tensor-parallel-inference/) — **官方工程文章。** 解释 Alpha-MoE 的融合边界与服务集成；性能数字应视为作者报告且依赖具体配置。
 - [One Kernel for All Your GPUs](https://hazyresearch.stanford.edu/blog/2025-09-22-pgl) — **工程博客。** 介绍 ThunderKittens PGL，以及在持久化多 GPU 内核中直接发起通信。
 - [mKernel: Fast Multi-GPU, Multi-Node Fused Kernels](https://uccl-project.github.io/posts/mkernel/) — **项目博客。** 解释 GPU 发起 RDMA、SM 专职化与库中的通信-计算融合内核。
@@ -287,7 +293,7 @@ timeline
 | 小而易读的模型专用实现 | **model-as-a-kernel**、**qwen_megakernel**、**MegaQwen**（注意各自输出阶段边界） |
 | 手写低延迟 CUDA | **HazyResearch Megakernels**、**qwen_megakernel**、**Lucebox** |
 | 多 GPU 低延迟服务 | **TileRT**、**MPK**、Hazy 的张量并行分支 |
-| 分布式 MoE 融合 | **FlashMoE**、**mKernel**、**Triton-distributed**、**Alpha-MoE** |
+| 分布式 MoE 融合 | **Mixture-of-Kittens**、**FlashMoE**、**mKernel**、**Triton-distributed**、**Alpha-MoE** |
 | 动态形状或路由 | **Event Tensor**、**RaMP**、**ExpertPlex** |
 | AMD / 非 NVIDIA 路线 | **Fleet**、**TileLang**、**megagdn-pto**、**AWS Transformer TKG** |
 | Agent 生成 Megakernel | **AutoMegaKernel** 与 [Awesome LLM Kernel Agent](https://github.com/qhy991/Awesome-LLM-Kernel-Agent) |

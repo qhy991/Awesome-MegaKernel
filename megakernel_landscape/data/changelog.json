@@ -1,5 +1,10 @@
 [
   {
+    "date": "2026-08-05",
+    "version": "v0.4.0",
+    "summary": "Added Mixture-of-Kittens to the catalog and timeline, published a source-level SM100 case study, and expanded the Chinese survey with deterministic MoE training, CLC scheduling, ring replay, and evidence-bounded performance analysis."
+  },
+  {
     "date": "2026-07-28",
     "version": "v0.3.0",
     "summary": "Added a Chinese literature review, transactional bilingual rendering, stricter schema and marker validation, regression tests, localized generated labels, and a second factual audit."

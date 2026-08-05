@@ -25,6 +25,7 @@ MARKDOWN_PATHS = (
     REPO_ROOT / "README.zh-CN.md",
     REPO_ROOT / "CONTRIBUTING.md",
     REPO_ROOT / "docs" / "megakernel-survey.zh-CN.md",
+    REPO_ROOT / "docs" / "case-studies" / "mixture-of-kittens.zh-CN.md",
     ROOT / "README.md",
     ROOT / "docs" / "taxonomy.md",
     REPO_ROOT / ".github" / "PULL_REQUEST_TEMPLATE.md",
