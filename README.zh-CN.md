@@ -5,10 +5,10 @@
 ### 整模型内核、持久化运行时与深度融合 LLM 系统的证据优先精选图谱
 
 [![Awesome](https://awesome.re/badge.svg)](https://awesome.re)
-[![Last Updated](https://img.shields.io/badge/Last%20Updated-2026--08--05-blue.svg)](https://github.com/qhy991/Awesome-MegaKernel)
+[![Last Updated](https://img.shields.io/badge/Last%20Updated-2026--08--14-blue.svg)](https://github.com/qhy991/Awesome-MegaKernel)
 [![Papers](https://img.shields.io/badge/Papers-27-green.svg)](#-研究论文与报告)
 [![Systems](https://img.shields.io/badge/Systems-27-orange.svg)](#-系统仓库与制品)
-[![Readings](https://img.shields.io/badge/Readings-14-blueviolet.svg)](#-博客与深度阅读)
+[![Readings](https://img.shields.io/badge/Readings-19-blueviolet.svg)](#-博客与深度阅读)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 [English README](README.md)
@@ -27,7 +27,7 @@
 
 > **收录原则：**“很大/融合的 Kernel”并不足够。核心条目必须在持久化内核或等价设备常驻引擎中调度多个模型算子或通信阶段。基础工作和相邻工作会被显式标注。
 
-**最近整理：**2026-08-05。标题、会议、代码关系与制品限制均依据论文主页、官方仓库和第一方文档核验。
+**最近整理：**2026-08-14。标题、会议、代码关系与制品限制均依据论文主页、官方仓库和第一方文档核验。
 
 ### 快速结论
 
@@ -41,6 +41,12 @@
 > [《MegaKernel 研究综述》](docs/megakernel-survey.zh-CN.md)。
 > Mixture-of-Kittens 的 SM100 源码级拆解见
 > [《Mixture-of-Kittens：确定性 MoE 训练 Megakernel》](docs/case-studies/mixture-of-kittens.zh-CN.md)。
+
+> 想区分通用的算通重叠与 MegaKernel 的独有机制，可参见
+> [《MegaKernel 的专属能力》](docs/megakernel-distinctive-capabilities.zh-CN.md)。
+
+> 想沿着 CUDA、编译器、Profiling、推理系统到 MegaKernel 系统学习，可参见
+> [《知乎“算子优化”收藏夹调研》](docs/zhihu-kernel-reading-guide.zh-CN.md)。
 
 ### 相关列表
 
@@ -262,6 +268,7 @@ timeline
 - [We Bought the Whole GPU, So We're Damn Well Going to Use the Whole GPU](https://hazyresearch.stanford.edu/blog/2025-09-28-tp-llama-main) — **工程博客。** Hazy Llama Megakernel 的多 GPU 张量并行续作，包含环境敏感性与调度选择。
 - [Look Ma, No Bubbles! Designing a Low-Latency Megakernel for Llama-1B](https://hazyresearch.stanford.edu/blog/2025-05-27-no-bubbles) — **工程博客。** 从第一性原理解释 Launch Gap、Wave Quantization、持久化调度与 Hazy 原始实现。
 - [Compiling LLMs into a Megakernel: A Path to Low-Latency Inference](https://zhihaojia.medium.com/compiling-llms-into-a-megakernel-a-path-to-low-latency-inference-cf7840913c17) — **作者博客。** 由作者介绍 MPK 的 SM 任务图、编译器与 Kernel 内运行时。
+- [Megakernel](https://zhuanlan.zhihu.com/p/2059950781344789216) — **仓库导读。** 利用 MegaQwen 并存的逐算子目录与 Transformer-block Megakernel 目录解释两种执行模型。
 - [Megakernel: Matching Apple Silicon Efficiency at 2x the Throughput on a RTX 3090](https://www.lucebox.com/blog/megakernel) — **项目博客。** 介绍 Luce 的持久化 Dispatch 设计，以及模型专用服务内核的约束。
 - [MegaQwen Development Log](https://github.com/Infatoshi/MegaQwen/blob/main/DEVLOG.md) — **开发日志。** 逐步记录消费级 GPU 上的正确性、数据搬运和内核优化决策。
 
@@ -272,15 +279,19 @@ timeline
 - [Mixture-of-Kittens: our open-source MoE megakernel for NVL72s](https://cursor.com/blog/mixture-of-kittens) — **第一方深度解析。** 解释可复用的 Pull-Dispatch/Push-Combine 调度、Minibatch 算通重叠、反向 Macrobatch Ring、精确 SM 分区、CLC 与跨机架通信共存、确定性及作者报告的 NVL72 结果。
 - [Alpha-MoE: A Megakernel for Faster Tensor Parallel Inference](https://aleph-alpha.com/en/blog/alpha-moe-a-megakernel-for-faster-tensor-parallel-inference/) — **官方工程文章。** 解释 Alpha-MoE 的融合边界与服务集成；性能数字应视为作者报告且依赖具体配置。
 - [One Kernel for All Your GPUs](https://hazyresearch.stanford.edu/blog/2025-09-22-pgl) — **工程博客。** 介绍 ThunderKittens PGL，以及在持久化多 GPU 内核中直接发起通信。
+- [MegaMoE 不止 MegaKernel](https://zhuanlan.zhihu.com/p/2061030607040390226) — **对比分析。** 将 MegaMoE 放回融合计算与 Collective 的技术谱系，并区分通用算通重叠与 Megakernel 专属调度。
 - [mKernel: Fast Multi-GPU, Multi-Node Fused Kernels](https://uccl-project.github.io/posts/mkernel/) — **项目博客。** 解释 GPU 发起 RDMA、SM 专职化与库中的通信-计算融合内核。
 
 ### 案例与视角
 
 提供背景与实践视角；阅读结论时需同时考虑其硬件和制品限制。
 
+- [MegaKernel是创新还是传销？](https://www.zhihu.com/question/2013258505231050695/answer/2071314457918183125) — **作者工程分析。** 在 B300 上分析 MegaRTP，并将 Kernel Fusion、Multistream DAG 与 PDL 的收益同 Megakernel Tile 级调度的增量价值分开归因。
 - [Building a Single-Kernel LLM Engine on AMD MI300X](https://blog.kog.ai/building-a-single-kernel-latency-optimized-llm-inference-engine-on-amd-mi300x-gpus/) — **行业案例。** 技术细节丰富的完整 Decode Monokernel 案例，覆盖 Prefill、Sampling 与张量并行；实现未开源，结果为厂商自报。
 - [How Rammer Squeezes More out of Accelerator Performance](https://www.microsoft.com/en-us/research/articles/osdi-20-how-rammer-squeezes-more-out-of-accelerator-performance/) — **研究文章。** 理解 rTask 与跨算子/算子内整体调度的历史背景。
+- [megakernel 的 sync 开销](https://zhuanlan.zhihu.com/p/2054985214791775283) — **工程分析。** 对比 AMD Megakernel 设计中的 HBM、LLC 与 L2 同步层级，并提醒同步元数据流量本身未必能解释关键路径成本。
 - [PipeThreader: Software-Defined Pipelining for Efficient DNN Execution](https://www.microsoft.com/en-us/research/articles/pipethreader/) — **研究文章。** 易读地介绍 sTask 图、GPU 专用单元和软件定义流水线。
+- [如何看待 Hazy Research 团队将 1B 模型的 Forward 融合为一个 MegaKernel？](https://www.zhihu.com/question/1911094042047000841/answer/1924145663601542224) — **第三方代码分析。** 从动机、执行模型、实现、意义与局限几个层面解读 Hazy Research 的 Llama-1B Megakernel。
 <!-- CATALOG:READINGS:END -->
 
 ---

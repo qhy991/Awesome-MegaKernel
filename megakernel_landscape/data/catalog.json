@@ -1,6 +1,6 @@
 {
   "version": "0.4.0",
-  "updated": "2026-08-05",
+  "updated": "2026-08-14",
   "categories": {
     "papers": [
       {
@@ -910,6 +910,67 @@
       "summary_en": "Explains reusable pull-dispatch/push-combine scheduling, minibatch overlap, the reversed macrobatch ring, exact SM partitioning, CLC coexistence with inter-rack communication, determinism, and author-reported NVL72 results.",
       "summary_zh": "解释可复用的 Pull-Dispatch/Push-Combine 调度、Minibatch 算通重叠、反向 Macrobatch Ring、精确 SM 分区、CLC 与跨机架通信共存、确定性及作者报告的 NVL72 结果。",
       "related": ["mixture_of_kittens"]
+    },
+    {
+      "id": "megartp_zhihu",
+      "name": "MegaKernel是创新还是传销？",
+      "url": "https://www.zhihu.com/question/2013258505231050695/answer/2071314457918183125",
+      "date": "2026-08",
+      "category": "perspective",
+      "scope": "adjacent",
+      "kind_en": "Author engineering analysis",
+      "kind_zh": "作者工程分析",
+      "summary_en": "A B300 case study of MegaRTP that separates gains from kernel fusion, multistream DAG execution, and PDL from the incremental value of tile-level megakernel scheduling.",
+      "summary_zh": "在 B300 上分析 MegaRTP，并将 Kernel Fusion、Multistream DAG 与 PDL 的收益同 Megakernel Tile 级调度的增量价值分开归因。",
+      "related": ["hazy_no_bubbles"]
+    },
+    {
+      "id": "hazy_megakernel_zhihu_analysis",
+      "name": "如何看待 Hazy Research 团队将 1B 模型的 Forward 融合为一个 MegaKernel？",
+      "url": "https://www.zhihu.com/question/1911094042047000841/answer/1924145663601542224",
+      "category": "perspective",
+      "scope": "adjacent",
+      "kind_en": "Third-party code analysis",
+      "kind_zh": "第三方代码分析",
+      "summary_en": "A Chinese walkthrough of the motivation, execution model, implementation, significance, and limitations of Hazy Research's Llama-1B megakernel.",
+      "summary_zh": "从动机、执行模型、实现、意义与局限几个层面解读 Hazy Research 的 Llama-1B Megakernel。",
+      "related": ["hazy_megakernels", "hazy_no_bubbles"]
+    },
+    {
+      "id": "megakernel_sync_zhihu",
+      "name": "megakernel 的 sync 开销",
+      "url": "https://zhuanlan.zhihu.com/p/2054985214791775283",
+      "category": "perspective",
+      "scope": "adjacent",
+      "kind_en": "Engineering analysis",
+      "kind_zh": "工程分析",
+      "summary_en": "Contrasts HBM-, LLC-, and L2-level synchronization in AMD-oriented megakernel designs and cautions that synchronization metadata traffic alone may not explain critical-path cost.",
+      "summary_zh": "对比 AMD Megakernel 设计中的 HBM、LLC 与 L2 同步层级，并提醒同步元数据流量本身未必能解释关键路径成本。",
+      "related": ["fleet", "kog_monokernel_blog"]
+    },
+    {
+      "id": "megaqwen_zhihu_analysis",
+      "name": "Megakernel",
+      "url": "https://zhuanlan.zhihu.com/p/2059950781344789216",
+      "category": "implementation",
+      "scope": "adjacent",
+      "kind_en": "Repository walkthrough",
+      "kind_zh": "仓库导读",
+      "summary_en": "Uses MegaQwen's side-by-side per-operator and transformer-block megakernel directories to explain the two execution models.",
+      "summary_zh": "利用 MegaQwen 并存的逐算子目录与 Transformer-block Megakernel 目录解释两种执行模型。",
+      "related": ["megaqwen"]
+    },
+    {
+      "id": "megamoe_zhihu_perspective",
+      "name": "MegaMoE 不止 MegaKernel",
+      "url": "https://zhuanlan.zhihu.com/p/2061030607040390226",
+      "category": "distributed",
+      "scope": "adjacent",
+      "kind_en": "Comparative analysis",
+      "kind_zh": "对比分析",
+      "summary_en": "Places MegaMoE in the longer lineage of fused computation-collective operators and separates generic compute-communication overlap from megakernel-specific scheduling.",
+      "summary_zh": "将 MegaMoE 放回融合计算与 Collective 的技术谱系，并区分通用算通重叠与 Megakernel 专属调度。",
+      "related": []
     },
     {
       "id": "luminal_blog",

@@ -5,10 +5,10 @@
 ### A curated, evidence-first map of whole-model kernels, persistent runtimes, and deeply fused LLM systems
 
 [![Awesome](https://awesome.re/badge.svg)](https://awesome.re)
-[![Last Updated](https://img.shields.io/badge/Last%20Updated-2026--08--05-blue.svg)](https://github.com/qhy991/Awesome-MegaKernel)
+[![Last Updated](https://img.shields.io/badge/Last%20Updated-2026--08--14-blue.svg)](https://github.com/qhy991/Awesome-MegaKernel)
 [![Papers](https://img.shields.io/badge/Papers-27-green.svg)](#-research-papers--reports)
 [![Systems](https://img.shields.io/badge/Systems-27-orange.svg)](#-systems-repositories--artifacts)
-[![Readings](https://img.shields.io/badge/Readings-14-blueviolet.svg)](#-blogs--deep-dive-reading)
+[![Readings](https://img.shields.io/badge/Readings-19-blueviolet.svg)](#-blogs--deep-dive-reading)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 [中文 README](README.zh-CN.md)
@@ -36,7 +36,7 @@ coarse compute–communication barriers can dominate useful work.
 > persistent kernel or equivalent device-resident engine. Foundations and
 > adjacent work are labeled explicitly.
 
-**Last curated:** 2026-08-05. Titles, venues, code relationships, and artifact
+**Last curated:** 2026-08-14. Titles, venues, code relationships, and artifact
 limitations were checked against primary paper pages, canonical repositories,
 and first-party documentation.
 
@@ -65,6 +65,12 @@ and first-party documentation.
 - [Mixture-of-Kittens source study (Chinese)](docs/case-studies/mixture-of-kittens.zh-CN.md)
   — an SM100-level audit of deterministic MoE training, communication direction,
   CLC scheduling, and activation replay.
+- [What is distinctive about MegaKernel? (Chinese)](docs/megakernel-distinctive-capabilities.zh-CN.md)
+  — separates generic overlap techniques from tile-level capabilities that
+  require a device-resident cross-operator runtime.
+- [Zhihu kernel reading guide (Chinese)](docs/zhihu-kernel-reading-guide.zh-CN.md)
+  — a curated route through 30 saved articles on kernels, compiler DSLs,
+  profiling, inference systems, and megakernel scheduling.
 - [Awesome LLM Kernel Agent](https://github.com/qhy991/Awesome-LLM-Kernel-Agent)
   — LLM/agent-driven kernel generation and optimization.
 - [Awesome LLM Circuit Agent](https://github.com/qhy991/Awesome-LLM-Circuit-Agent)
@@ -293,6 +299,7 @@ First-party implementation notes and reproducible walkthroughs.
 - [We Bought the Whole GPU, So We're Damn Well Going to Use the Whole GPU](https://hazyresearch.stanford.edu/blog/2025-09-28-tp-llama-main) — **Engineering blog.** The multi-GPU tensor-parallel continuation of Hazy's Llama megakernel work, including its environment sensitivity and scheduling choices.
 - [Look Ma, No Bubbles! Designing a Low-Latency Megakernel for Llama-1B](https://hazyresearch.stanford.edu/blog/2025-05-27-no-bubbles) — **Engineering blog.** The clearest first-principles introduction to launch gaps, wave quantization, persistent scheduling, and Hazy's original implementation.
 - [Compiling LLMs into a Megakernel: A Path to Low-Latency Inference](https://zhihaojia.medium.com/compiling-llms-into-a-megakernel-a-path-to-low-latency-inference-cf7840913c17) — **Author blog.** An author-level overview of MPK's SM task graph, compiler, and in-kernel runtime.
+- [Megakernel](https://zhuanlan.zhihu.com/p/2059950781344789216) — **Repository walkthrough.** Uses MegaQwen's side-by-side per-operator and transformer-block megakernel directories to explain the two execution models.
 - [Megakernel: Matching Apple Silicon Efficiency at 2x the Throughput on a RTX 3090](https://www.lucebox.com/blog/megakernel) — **Project blog.** Walks through Luce's persistent dispatch design and the constraints of model-specific serving kernels.
 - [MegaQwen Development Log](https://github.com/Infatoshi/MegaQwen/blob/main/DEVLOG.md) — **Devlog.** A step-by-step record of correctness, memory movement, and kernel optimization decisions for a consumer GPU.
 
@@ -303,15 +310,19 @@ Engineering notes on tensor/expert parallelism, GPU-initiated communication, and
 - [Mixture-of-Kittens: our open-source MoE megakernel for NVL72s](https://cursor.com/blog/mixture-of-kittens) — **First-party deep dive.** Explains reusable pull-dispatch/push-combine scheduling, minibatch overlap, the reversed macrobatch ring, exact SM partitioning, CLC coexistence with inter-rack communication, determinism, and author-reported NVL72 results.
 - [Alpha-MoE: A Megakernel for Faster Tensor Parallel Inference](https://aleph-alpha.com/en/blog/alpha-moe-a-megakernel-for-faster-tensor-parallel-inference/) — **Official engineering post.** Explains Alpha-MoE's fusion boundary and serving integration; treat benchmark figures as author-reported and configuration-specific.
 - [One Kernel for All Your GPUs](https://hazyresearch.stanford.edu/blog/2025-09-22-pgl) — **Engineering blog.** Introduces ThunderKittens PGL and communication directly from persistent multi-GPU kernels.
+- [MegaMoE 不止 MegaKernel](https://zhuanlan.zhihu.com/p/2061030607040390226) — **Comparative analysis.** Places MegaMoE in the longer lineage of fused computation-collective operators and separates generic compute-communication overlap from megakernel-specific scheduling.
 - [mKernel: Fast Multi-GPU, Multi-Node Fused Kernels](https://uccl-project.github.io/posts/mkernel/) — **Project blog.** Explains GPU-initiated RDMA, SM specialization, and the library's fused collective-compute kernels.
 
 ### Case studies & perspective
 
 Useful context whose claims should be read with the stated hardware and artifact limitations.
 
+- [MegaKernel是创新还是传销？](https://www.zhihu.com/question/2013258505231050695/answer/2071314457918183125) — **Author engineering analysis.** A B300 case study of MegaRTP that separates gains from kernel fusion, multistream DAG execution, and PDL from the incremental value of tile-level megakernel scheduling.
 - [Building a Single-Kernel LLM Engine on AMD MI300X](https://blog.kog.ai/building-a-single-kernel-latency-optimized-llm-inference-engine-on-amd-mi300x-gpus/) — **Industry case study.** A technically detailed full-decode monokernel story covering prefill, sampling, and tensor parallelism; the implementation is closed and results are vendor-reported.
 - [How Rammer Squeezes More out of Accelerator Performance](https://www.microsoft.com/en-us/research/articles/osdi-20-how-rammer-squeezes-more-out-of-accelerator-performance/) — **Research article.** Historical context for rTasks and holistic inter-/intra-operator scheduling.
+- [megakernel 的 sync 开销](https://zhuanlan.zhihu.com/p/2054985214791775283) — **Engineering analysis.** Contrasts HBM-, LLC-, and L2-level synchronization in AMD-oriented megakernel designs and cautions that synchronization metadata traffic alone may not explain critical-path cost.
 - [PipeThreader: Software-Defined Pipelining for Efficient DNN Execution](https://www.microsoft.com/en-us/research/articles/pipethreader/) — **Research article.** A readable overview of sTask graphs, specialized GPU units, and software-defined pipelines.
+- [如何看待 Hazy Research 团队将 1B 模型的 Forward 融合为一个 MegaKernel？](https://www.zhihu.com/question/1911094042047000841/answer/1924145663601542224) — **Third-party code analysis.** A Chinese walkthrough of the motivation, execution model, implementation, significance, and limitations of Hazy Research's Llama-1B megakernel.
 <!-- CATALOG:READINGS:END -->
 
 ---

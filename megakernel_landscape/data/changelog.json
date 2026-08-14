@@ -1,8 +1,8 @@
 [
   {
-    "date": "2026-08-05",
+    "date": "2026-08-14",
     "version": "v0.4.0",
-    "summary": "Added Mixture-of-Kittens to the catalog and timeline, published a source-level SM100 case study, and expanded the Chinese survey with deterministic MoE training, CLC scheduling, ring replay, and evidence-bounded performance analysis."
+    "summary": "Added Mixture-of-Kittens to the catalog and timeline with an SM100 source study; added a mechanism-focused MegaKernel note, a curated guide to 30 kernel-related Zhihu readings, and five MegaKernel case studies covering MegaRTP, Hazy, synchronization, MegaQwen, and MegaMoE."
   },
   {
     "date": "2026-07-28",
