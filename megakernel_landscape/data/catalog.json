@@ -1,6 +1,6 @@
 {
-  "version": "0.4.0",
-  "updated": "2026-08-14",
+  "version": "0.5.0",
+  "updated": "2026-09-23",
   "categories": {
     "papers": [
       {
@@ -196,6 +196,22 @@
       "related": ["flashformer_repo"],
       "timeline_label_en": "FlashFormer",
       "timeline_label_zh": "FlashFormer"
+    },
+    {
+      "id": "weave",
+      "name": "Weave: Fine-Grained Dynamic SM Scheduling in an MoE Megakernel for Compute-Communication Overlap",
+      "url": "https://arxiv.org/abs/2609.21483",
+      "venue": "arXiv",
+      "date": "2026-09",
+      "category": "moe_distributed",
+      "scope": "core",
+      "code": null,
+      "topics": ["MoE", "Expert Parallel", "Dynamic SM Scheduling", "Compute-Communication Overlap"],
+      "summary_en": "Runs dispatch, expert computation, activation, and combine in one persistent megakernel, using a runtime cost model to partition SMs per layer and GPU and a temporal scheduler to reduce dependency bubbles.",
+      "summary_zh": "在单个持久化 Megakernel 中执行 Dispatch、专家计算、激活与 Combine，并通过运行时成本模型按层、按 GPU 划分 SM，再用时间调度器减少依赖气泡。",
+      "related": [],
+      "timeline_label_en": "Weave",
+      "timeline_label_zh": "Weave"
     },
     {
       "id": "expertplex",

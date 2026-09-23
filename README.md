@@ -5,8 +5,8 @@
 ### A curated, evidence-first map of whole-model kernels, persistent runtimes, and deeply fused LLM systems
 
 [![Awesome](https://awesome.re/badge.svg)](https://awesome.re)
-[![Last Updated](https://img.shields.io/badge/Last%20Updated-2026--08--14-blue.svg)](https://github.com/qhy991/Awesome-MegaKernel)
-[![Papers](https://img.shields.io/badge/Papers-27-green.svg)](#-research-papers--reports)
+[![Last Updated](https://img.shields.io/badge/Last%20Updated-2026--09--23-blue.svg)](https://github.com/qhy991/Awesome-MegaKernel)
+[![Papers](https://img.shields.io/badge/Papers-28-green.svg)](#-research-papers--reports)
 [![Systems](https://img.shields.io/badge/Systems-27-orange.svg)](#-systems-repositories--artifacts)
 [![Readings](https://img.shields.io/badge/Readings-19-blueviolet.svg)](#-blogs--deep-dive-reading)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
@@ -36,7 +36,7 @@ coarse compute–communication barriers can dominate useful work.
 > persistent kernel or equivalent device-resident engine. Foundations and
 > adjacent work are labeled explicitly.
 
-**Last curated:** 2026-08-14. Titles, venues, code relationships, and artifact
+**Last curated:** 2026-09-23. Titles, venues, code relationships, and artifact
 limitations were checked against primary paper pages, canonical repositories,
 and first-party documentation.
 
@@ -148,6 +148,7 @@ timeline
     2026-06 : AutoMegaKernel
     2026-07 : ExpertPlex
     2026-08 : Mixture-of-Kittens
+    2026-09 : Weave
 ```
 <!-- CATALOG:TIMELINE:END -->
 
@@ -182,6 +183,7 @@ Layer- and subgraph-scale megakernels that jointly schedule expert computation, 
 
 | Work | Venue | First public | Code | Scope & contribution |
 | :--- | :---: | :---: | :---: | :--- |
+| [**Weave: Fine-Grained Dynamic SM Scheduling in an MoE Megakernel for Compute-Communication Overlap**](https://arxiv.org/abs/2609.21483) | arXiv | 2026-09 | — | **Core** — Runs dispatch, expert computation, activation, and combine in one persistent megakernel, using a runtime cost model to partition SMs per layer and GPU and a temporal scheduler to reduce dependency bubbles.<br><sub>`MoE` `Expert Parallel` `Dynamic SM Scheduling` `Compute-Communication Overlap`</sub> |
 | [**ExpertPlex: A High-Goodput Disaggregated Serving System for MoE LLMs with Adaptive Persistent Kernels**](https://arxiv.org/abs/2607.18002) | arXiv | 2026-07 | — | **Core** — Shares expert weights across prefill and decode while adaptive tile-granular persistent kernels isolate and schedule dynamic expert computation.<br><sub>`MoE` `Disaggregation` `Persistent Kernel`</sub> |
 | [**UniEP: Unified Expert-Parallel MoE MegaKernel for LLM Training**](https://arxiv.org/abs/2604.19241) | HPDC 2026 | 2026-04 | [Code](https://github.com/ByteDance-Seed/Triton-distributed) | **Core** — Fuses expert-parallel communication and computation into configurable megakernels while preserving deterministic token ordering; its implementation lives inside the broader Triton-distributed project.<br><sub>`MoE Training` `Expert Parallel` `Overlap`</sub> |
 | [**Alpha-MoE: A Megakernel for Faster Tensor Parallel Inference**](https://aleph-alpha.com/wp-content/uploads/Alpha-MoE_A-Megakernel-for-Faster-Tensor-Parallel-Inference_Report.pdf) | Technical report | 2025-12 | [Code](https://github.com/Aleph-Alpha/Alpha-MoE) | **Core** — A Hopper-oriented W8A8 MoE-layer megakernel that fuses the two projections, activation, quantization, and local combine for tensor-parallel serving.<br><sub>`MoE` `Tensor Parallel` `FP8`</sub> |

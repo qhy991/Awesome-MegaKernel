@@ -5,8 +5,8 @@
 ### 整模型内核、持久化运行时与深度融合 LLM 系统的证据优先精选图谱
 
 [![Awesome](https://awesome.re/badge.svg)](https://awesome.re)
-[![Last Updated](https://img.shields.io/badge/Last%20Updated-2026--08--14-blue.svg)](https://github.com/qhy991/Awesome-MegaKernel)
-[![Papers](https://img.shields.io/badge/Papers-27-green.svg)](#-研究论文与报告)
+[![Last Updated](https://img.shields.io/badge/Last%20Updated-2026--09--23-blue.svg)](https://github.com/qhy991/Awesome-MegaKernel)
+[![Papers](https://img.shields.io/badge/Papers-28-green.svg)](#-研究论文与报告)
 [![Systems](https://img.shields.io/badge/Systems-27-orange.svg)](#-系统仓库与制品)
 [![Readings](https://img.shields.io/badge/Readings-19-blueviolet.svg)](#-博客与深度阅读)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
@@ -27,7 +27,7 @@
 
 > **收录原则：**“很大/融合的 Kernel”并不足够。核心条目必须在持久化内核或等价设备常驻引擎中调度多个模型算子或通信阶段。基础工作和相邻工作会被显式标注。
 
-**最近整理：**2026-08-14。标题、会议、代码关系与制品限制均依据论文主页、官方仓库和第一方文档核验。
+**最近整理：**2026-09-23。标题、会议、代码关系与制品限制均依据论文主页、官方仓库和第一方文档核验。
 
 ### 快速结论
 
@@ -123,6 +123,7 @@ timeline
     2026-06 : AutoMegaKernel
     2026-07 : ExpertPlex
     2026-08 : Mixture-of-Kittens
+    2026-09 : Weave
 ```
 <!-- CATALOG:TIMELINE:END -->
 
@@ -153,6 +154,7 @@ timeline
 
 | 工作 | 会议/来源 | 首次公开 | 代码 | 范围与贡献 |
 | :--- | :---: | :---: | :---: | :--- |
+| [**Weave: Fine-Grained Dynamic SM Scheduling in an MoE Megakernel for Compute-Communication Overlap**](https://arxiv.org/abs/2609.21483) | arXiv | 2026-09 | — | **核心** — 在单个持久化 Megakernel 中执行 Dispatch、专家计算、激活与 Combine，并通过运行时成本模型按层、按 GPU 划分 SM，再用时间调度器减少依赖气泡。<br><sub>`MoE` `Expert Parallel` `Dynamic SM Scheduling` `Compute-Communication Overlap`</sub> |
 | [**ExpertPlex: A High-Goodput Disaggregated Serving System for MoE LLMs with Adaptive Persistent Kernels**](https://arxiv.org/abs/2607.18002) | arXiv | 2026-07 | — | **核心** — 在 Prefill 与 Decode 间共享专家权重，并用自适应 Tile 粒度持久化内核隔离、调度动态专家计算。<br><sub>`MoE` `Disaggregation` `Persistent Kernel`</sub> |
 | [**UniEP: Unified Expert-Parallel MoE MegaKernel for LLM Training**](https://arxiv.org/abs/2604.19241) | HPDC 2026 | 2026-04 | [代码](https://github.com/ByteDance-Seed/Triton-distributed) | **核心** — 把专家并行通信与计算融合为可配置 Megakernel，并保持确定性 Token 顺序；实现位于更大的 Triton-distributed 项目中。<br><sub>`MoE Training` `Expert Parallel` `Overlap`</sub> |
 | [**Alpha-MoE: A Megakernel for Faster Tensor Parallel Inference**](https://aleph-alpha.com/wp-content/uploads/Alpha-MoE_A-Megakernel-for-Faster-Tensor-Parallel-Inference_Report.pdf) | Technical report | 2025-12 | [代码](https://github.com/Aleph-Alpha/Alpha-MoE) | **核心** — 面向 Hopper 的 W8A8 MoE 层 Megakernel，为张量并行服务融合两次投影、激活、量化与本地 Combine。<br><sub>`MoE` `Tensor Parallel` `FP8`</sub> |
