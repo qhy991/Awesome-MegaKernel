@@ -5,8 +5,8 @@
 ### A curated, evidence-first map of whole-model kernels, persistent runtimes, and deeply fused LLM systems
 
 [![Awesome](https://awesome.re/badge.svg)](https://awesome.re)
-[![Last Updated](https://img.shields.io/badge/Last%20Updated-2026--09--23-blue.svg)](https://github.com/qhy991/Awesome-MegaKernel)
-[![Papers](https://img.shields.io/badge/Papers-28-green.svg)](#-research-papers--reports)
+[![Last Updated](https://img.shields.io/badge/Last%20Updated-2026--11--19-blue.svg)](https://github.com/qhy991/Awesome-MegaKernel)
+[![Papers](https://img.shields.io/badge/Papers-35-green.svg)](#-research-papers--reports)
 [![Systems](https://img.shields.io/badge/Systems-27-orange.svg)](#-systems-repositories--artifacts)
 [![Readings](https://img.shields.io/badge/Readings-19-blueviolet.svg)](#-blogs--deep-dive-reading)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
@@ -36,7 +36,7 @@ coarse compute–communication barriers can dominate useful work.
 > persistent kernel or equivalent device-resident engine. Foundations and
 > adjacent work are labeled explicitly.
 
-**Last curated:** 2026-09-23. Titles, venues, code relationships, and artifact
+**Last curated:** 2026-11-19. Titles, venues, code relationships, and artifact
 limitations were checked against primary paper pages, canonical repositories,
 and first-party documentation.
 
@@ -148,7 +148,13 @@ timeline
     2026-06 : AutoMegaKernel
     2026-07 : ExpertPlex
     2026-08 : Mixture-of-Kittens
-    2026-09 : Weave
+    2026-09 : MegaFlux
+            : Mixture-of-Kittens paper
+            : Weave
+    2026-10 : One Megakernel is Not Enough
+            : Weights That Stay
+    2026-11 : MegaOps
+            : Regime-aware ASR megakernels
 ```
 <!-- CATALOG:TIMELINE:END -->
 
@@ -169,6 +175,9 @@ Core work that turns a model or tensor program into one persistent execution sub
 
 | Work | Venue | First public | Code | Scope & contribution |
 | :--- | :---: | :---: | :---: | :--- |
+| [**High-Throughput Serving of Nemotron 3.5 Transcribe with Regime-Aware Megakernels and Kernel Fusion**](https://arxiv.org/abs/2611.20095) | arXiv | 2026-11 | — | **Core** — Chooses persistent megakernels or fused kernel chains per serving pass using offline-measured crossovers under continuous batching.<br><sub>`Serving` `ASR` `Adaptive Fusion`</sub> |
+| [**One Megakernel is Not Enough: Predicting Where to Cut for Streaming Inference**](https://arxiv.org/abs/2610.35336) | arXiv | 2026-10 | — | **Core** — Selects a composition of megakernel regions from graph profiles and standalone kernel measurements instead of assuming one monolithic fused kernel is optimal.<br><sub>`Fusion Boundary` `Streaming Inference` `Region Selection`</sub> |
+| [**Weights That Stay: On-Chip Megakernels for Serial Heads in Speculative Decoding**](https://arxiv.org/abs/2611.00506) | arXiv | 2026-10 | — | **Core** — Keeps vocabulary-projection shards resident on chip and couples them with token selection and state advancement in a persistent serial-draft megakernel.<br><sub>`Speculative Decoding` `Weight Residency` `Persistent Kernel`</sub> |
 | [**AutoMegaKernel: A Statically-Checked Agent Harness for Self-Retargeting Megakernel Synthesis**](https://arxiv.org/abs/2606.09682) | arXiv | 2026-06 | [Code](https://github.com/RightNow-AI/AutoMegaKernel) | **Core** — Uses an agent-facing schedule IR plus static deadlock and race checks to synthesize one cooperative CUDA forward kernel across several NVIDIA architectures.<br><sub>`Agent` `CUDA` `Verification`</sub> |
 | [**Ada-MK: Adaptive MegaKernel Optimization via Automated DAG-based Search for LLM Inference**](https://arxiv.org/abs/2605.11581) | arXiv | 2026-05 | — | **Core** — Hoists scheduling decisions into an offline MLIR DAG search and integrates the resulting decode megakernel into a hybrid TensorRT-LLM serving path on NVIDIA L20.<br><sub>`DAG Search` `MLIR` `Ada GPU`</sub> |
 | [**DITRON: Distributed Multi-level Tiling Compiler for Parallel Tensor Programs**](https://arxiv.org/abs/2605.02953) | ICML 2026 | 2026-05 | [Code](https://github.com/ByteDance-Seed/Triton-distributed) | **Core** — Introduces Core-, Device-, and Task-level tiling; the Task level composes Triton tasks and communication into a distributed megakernel with scoreboard scheduling.<br><sub>`Compiler` `Distributed` `Tiling`</sub> |
@@ -183,6 +192,8 @@ Layer- and subgraph-scale megakernels that jointly schedule expert computation, 
 
 | Work | Venue | First public | Code | Scope & contribution |
 | :--- | :---: | :---: | :---: | :--- |
+| [**MegaFlux: Skew-Resilient MoE Megakernels via Pipelined Expert Replication**](https://arxiv.org/abs/2610.00671) | arXiv | 2026-09 | — | **Core** — Makes hot-expert replication a runtime decision and pipelines replica-weight delivery and gradient reduction inside persistent MoE execution to reduce routing skew.<br><sub>`MoE` `Expert Replication` `Routing Skew`</sub> |
+| [**Mixture-of-Kittens: MoE Megakernel for NVL72s**](https://arxiv.org/abs/2609.36070) | arXiv | 2026-09 | [Code](https://github.com/cursor/mixture-of-kittens) | **Core** — Presents an NVL72 MoE training system with forward and backward megakernels, deterministic reductions, communication-compute overlap, and bounded activation replay.<br><sub>`MoE` `NVL72` `Training Megakernel`</sub> |
 | [**Weave: Fine-Grained Dynamic SM Scheduling in an MoE Megakernel for Compute-Communication Overlap**](https://arxiv.org/abs/2609.21483) | arXiv | 2026-09 | — | **Core** — Runs dispatch, expert computation, activation, and combine in one persistent megakernel, using a runtime cost model to partition SMs per layer and GPU and a temporal scheduler to reduce dependency bubbles.<br><sub>`MoE` `Expert Parallel` `Dynamic SM Scheduling` `Compute-Communication Overlap`</sub> |
 | [**ExpertPlex: A High-Goodput Disaggregated Serving System for MoE LLMs with Adaptive Persistent Kernels**](https://arxiv.org/abs/2607.18002) | arXiv | 2026-07 | — | **Core** — Shares expert weights across prefill and decode while adaptive tile-granular persistent kernels isolate and schedule dynamic expert computation.<br><sub>`MoE` `Disaggregation` `Persistent Kernel`</sub> |
 | [**UniEP: Unified Expert-Parallel MoE MegaKernel for LLM Training**](https://arxiv.org/abs/2604.19241) | HPDC 2026 | 2026-04 | [Code](https://github.com/ByteDance-Seed/Triton-distributed) | **Core** — Fuses expert-parallel communication and computation into configurable megakernels while preserving deterministic token ordering; its implementation lives inside the broader Triton-distributed project.<br><sub>`MoE Training` `Expert Parallel` `Overlap`</sub> |
@@ -211,6 +222,8 @@ Useful counterpoints and smaller-scope fusion work; these are not presented as w
 
 | Work | Venue | First public | Code | Scope & contribution |
 | :--- | :---: | :---: | :---: | :--- |
+| [**MegaOps: A Kernel Overlapping Framework with PyTorch-like Modularity and Megakernel Performance**](https://arxiv.org/abs/2611.16248) | arXiv | 2026-11 | — | **Adjacent** — Explores concurrent dependent-kernel execution as a modular alternative to one fused whole-model megakernel.<br><sub>`Kernel Overlap` `Modularity` `Framework`</sub> |
+| [**Understanding GPU Megakernels: Why Residency Can Mislead**](https://arxiv.org/abs/2611.00495) | arXiv | 2026-10 | — | **Adjacent** — Reconstructs ThunderKittens and VDCores megakernels as separate kernels and shows when CTA residency overstates or obscures useful operator overlap.<br><sub>`Residency` `Programmatic Dependent Launch` `Counterpoint`</sub> |
 | [**Megakernel vs Wavefront GPU Path Tracing**](https://arxiv.org/abs/2605.27323) | arXiv | 2026-05 | — | **Adjacent** — A modern graphics comparison that helps separate the megakernel execution strategy from LLM-specific workloads.<br><sub>`Graphics` `Wavefront` `Cache Locality`</sub> |
 | [**VDCores: Resource Decoupled Programming and Execution for Asynchronous GPU**](https://arxiv.org/abs/2605.03190) | arXiv | 2026-05 | [Code](https://github.com/vdcores/vdcores) | **Adjacent** — Challenges monolithic orchestration for asynchronous GPU units and instead schedules dependency-connected micro-ops over resource-isolated virtual cores.<br><sub>`Micro-ops` `Async GPU` `Alternative`</sub> |
 | [**RaMP: Runtime-Aware Megakernel Polymorphism for Mixture-of-Experts**](https://arxiv.org/abs/2604.26039) | arXiv | 2026-04 | — | **Adjacent** — Selects among polymorphic CuTe kernel configurations from the runtime expert-routing histogram rather than batch size alone.<br><sub>`MoE` `Routing` `CuTe`</sub> |

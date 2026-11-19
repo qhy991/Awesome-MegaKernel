@@ -5,8 +5,8 @@
 ### 整模型内核、持久化运行时与深度融合 LLM 系统的证据优先精选图谱
 
 [![Awesome](https://awesome.re/badge.svg)](https://awesome.re)
-[![Last Updated](https://img.shields.io/badge/Last%20Updated-2026--09--23-blue.svg)](https://github.com/qhy991/Awesome-MegaKernel)
-[![Papers](https://img.shields.io/badge/Papers-28-green.svg)](#-研究论文与报告)
+[![Last Updated](https://img.shields.io/badge/Last%20Updated-2026--11--19-blue.svg)](https://github.com/qhy991/Awesome-MegaKernel)
+[![Papers](https://img.shields.io/badge/Papers-35-green.svg)](#-研究论文与报告)
 [![Systems](https://img.shields.io/badge/Systems-27-orange.svg)](#-系统仓库与制品)
 [![Readings](https://img.shields.io/badge/Readings-19-blueviolet.svg)](#-博客与深度阅读)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
@@ -27,7 +27,7 @@
 
 > **收录原则：**“很大/融合的 Kernel”并不足够。核心条目必须在持久化内核或等价设备常驻引擎中调度多个模型算子或通信阶段。基础工作和相邻工作会被显式标注。
 
-**最近整理：**2026-09-23。标题、会议、代码关系与制品限制均依据论文主页、官方仓库和第一方文档核验。
+**最近整理：**2026-11-19。标题、会议、代码关系与制品限制均依据论文主页、官方仓库和第一方文档核验。
 
 ### 快速结论
 
@@ -123,7 +123,13 @@ timeline
     2026-06 : AutoMegaKernel
     2026-07 : ExpertPlex
     2026-08 : Mixture-of-Kittens
-    2026-09 : Weave
+    2026-09 : MegaFlux
+            : Mixture-of-Kittens 论文
+            : Weave
+    2026-10 : One Megakernel is Not Enough
+            : Weights That Stay
+    2026-11 : MegaOps
+            : 负载状态感知 ASR Megakernel
 ```
 <!-- CATALOG:TIMELINE:END -->
 
@@ -140,6 +146,9 @@ timeline
 
 | 工作 | 会议/来源 | 首次公开 | 代码 | 范围与贡献 |
 | :--- | :---: | :---: | :---: | :--- |
+| [**High-Throughput Serving of Nemotron 3.5 Transcribe with Regime-Aware Megakernels and Kernel Fusion**](https://arxiv.org/abs/2611.20095) | arXiv | 2026-11 | — | **核心** — 在连续 Batching 下根据离线测得的交叉点，为每次服务执行选择持久化 Megakernel 或融合 Kernel 链。<br><sub>`Serving` `ASR` `Adaptive Fusion`</sub> |
+| [**One Megakernel is Not Enough: Predicting Where to Cut for Streaming Inference**](https://arxiv.org/abs/2610.35336) | arXiv | 2026-10 | — | **核心** — 结合图级 Profile 与独立 Kernel 测量选择多个 Megakernel 区域，而不是预设单个单体融合内核一定最优。<br><sub>`Fusion Boundary` `Streaming Inference` `Region Selection`</sub> |
+| [**Weights That Stay: On-Chip Megakernels for Serial Heads in Speculative Decoding**](https://arxiv.org/abs/2611.00506) | arXiv | 2026-10 | — | **核心** — 把词表投影分片常驻片上，并在持久化串行 Draft Megakernel 中结合 Token 选择与状态推进，减少每步重复权重传输。<br><sub>`Speculative Decoding` `Weight Residency` `Persistent Kernel`</sub> |
 | [**AutoMegaKernel: A Statically-Checked Agent Harness for Self-Retargeting Megakernel Synthesis**](https://arxiv.org/abs/2606.09682) | arXiv | 2026-06 | [代码](https://github.com/RightNow-AI/AutoMegaKernel) | **核心** — 通过面向 Agent 的调度 IR 与死锁/竞态静态检查，在多代 NVIDIA 架构上合成单个 cooperative CUDA 前向内核。<br><sub>`Agent` `CUDA` `Verification`</sub> |
 | [**Ada-MK: Adaptive MegaKernel Optimization via Automated DAG-based Search for LLM Inference**](https://arxiv.org/abs/2605.11581) | arXiv | 2026-05 | — | **核心** — 将调度决策前移到离线 MLIR DAG 搜索，并把生成的 Decode Megakernel 集成到 NVIDIA L20 上的混合 TensorRT-LLM 服务路径。<br><sub>`DAG Search` `MLIR` `Ada GPU`</sub> |
 | [**DITRON: Distributed Multi-level Tiling Compiler for Parallel Tensor Programs**](https://arxiv.org/abs/2605.02953) | ICML 2026 | 2026-05 | [代码](https://github.com/ByteDance-Seed/Triton-distributed) | **核心** — 提出 Core、Device、Task 三级 Tiling；Task 层通过记分牌调度把 Triton 任务与通信组合为分布式 Megakernel。<br><sub>`Compiler` `Distributed` `Tiling`</sub> |
@@ -154,6 +163,8 @@ timeline
 
 | 工作 | 会议/来源 | 首次公开 | 代码 | 范围与贡献 |
 | :--- | :---: | :---: | :---: | :--- |
+| [**MegaFlux: Skew-Resilient MoE Megakernels via Pipelined Expert Replication**](https://arxiv.org/abs/2610.00671) | arXiv | 2026-09 | — | **核心** — 把热点专家复制作为运行时决策，并在持久化 MoE 执行中流水化副本权重传输与梯度规约，以缓解路由偏斜造成的长尾。<br><sub>`MoE` `Expert Replication` `Routing Skew`</sub> |
+| [**Mixture-of-Kittens: MoE Megakernel for NVL72s**](https://arxiv.org/abs/2609.36070) | arXiv | 2026-09 | [代码](https://github.com/cursor/mixture-of-kittens) | **核心** — 提出面向 NVL72 的 MoE 训练系统，以前向与反向 Megakernel、确定性规约、算通重叠和受限激活重放支撑大规模 Scale-up 训练。<br><sub>`MoE` `NVL72` `Training Megakernel`</sub> |
 | [**Weave: Fine-Grained Dynamic SM Scheduling in an MoE Megakernel for Compute-Communication Overlap**](https://arxiv.org/abs/2609.21483) | arXiv | 2026-09 | — | **核心** — 在单个持久化 Megakernel 中执行 Dispatch、专家计算、激活与 Combine，并通过运行时成本模型按层、按 GPU 划分 SM，再用时间调度器减少依赖气泡。<br><sub>`MoE` `Expert Parallel` `Dynamic SM Scheduling` `Compute-Communication Overlap`</sub> |
 | [**ExpertPlex: A High-Goodput Disaggregated Serving System for MoE LLMs with Adaptive Persistent Kernels**](https://arxiv.org/abs/2607.18002) | arXiv | 2026-07 | — | **核心** — 在 Prefill 与 Decode 间共享专家权重，并用自适应 Tile 粒度持久化内核隔离、调度动态专家计算。<br><sub>`MoE` `Disaggregation` `Persistent Kernel`</sub> |
 | [**UniEP: Unified Expert-Parallel MoE MegaKernel for LLM Training**](https://arxiv.org/abs/2604.19241) | HPDC 2026 | 2026-04 | [代码](https://github.com/ByteDance-Seed/Triton-distributed) | **核心** — 把专家并行通信与计算融合为可配置 Megakernel，并保持确定性 Token 顺序；实现位于更大的 Triton-distributed 项目中。<br><sub>`MoE Training` `Expert Parallel` `Overlap`</sub> |
@@ -182,6 +193,8 @@ timeline
 
 | 工作 | 会议/来源 | 首次公开 | 代码 | 范围与贡献 |
 | :--- | :---: | :---: | :---: | :--- |
+| [**MegaOps: A Kernel Overlapping Framework with PyTorch-like Modularity and Megakernel Performance**](https://arxiv.org/abs/2611.16248) | arXiv | 2026-11 | — | **相邻** — 以可并发的依赖 Kernel 执行探索 Megakernel 性能与框架模块化之间的折中，并未把所有算子合并为单个持久化内核。<br><sub>`Kernel Overlap` `Modularity` `Framework`</sub> |
+| [**Understanding GPU Megakernels: Why Residency Can Mislead**](https://arxiv.org/abs/2611.00495) | arXiv | 2026-10 | — | **相邻** — 将 ThunderKittens 与 VDCores Megakernel 重构为分离内核，分析 CTA 驻留何时会误判或掩盖真实的算子重叠收益。<br><sub>`Residency` `Programmatic Dependent Launch` `Counterpoint`</sub> |
 | [**Megakernel vs Wavefront GPU Path Tracing**](https://arxiv.org/abs/2605.27323) | arXiv | 2026-05 | — | **相邻** — 现代图形学场景中的对比研究，有助于把 Megakernel 执行策略与 LLM 特有负载区分开。<br><sub>`Graphics` `Wavefront` `Cache Locality`</sub> |
 | [**VDCores: Resource Decoupled Programming and Execution for Asynchronous GPU**](https://arxiv.org/abs/2605.03190) | arXiv | 2026-05 | [代码](https://github.com/vdcores/vdcores) | **相邻** — 针对异步 GPU 单元质疑单体式编排，改以依赖连接的 Micro-op 在资源隔离的 Virtual Core 上调度。<br><sub>`Micro-ops` `Async GPU` `Alternative`</sub> |
 | [**RaMP: Runtime-Aware Megakernel Polymorphism for Mixture-of-Experts**](https://arxiv.org/abs/2604.26039) | arXiv | 2026-04 | — | **相邻** — 依据运行时专家路由直方图，而不是仅凭 Batch Size，在多种 CuTe 内核配置间动态选择。<br><sub>`MoE` `Routing` `CuTe`</sub> |
